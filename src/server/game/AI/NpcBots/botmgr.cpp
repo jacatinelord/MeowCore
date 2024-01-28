@@ -49,8 +49,11 @@ TODO: Move creature hooks here
 static std::list<BotMgr::delayed_teleport_callback_type> delayed_bot_teleports;
 
 //config
-uint8 _basefollowdist;
-uint8 _maxNpcBots;
+uint32 _basefollowdist;
+uint32 _maxNpcBots;
+uint32 _meowmNpcBots;
+uint32 _gmnpcbots;
+uint32 themaxnpcbot;
 uint8 _maxClassNpcBots;
 uint8 _xpReductionAmount;
 uint8 _xpReductionStartingNumber;
@@ -280,6 +283,8 @@ void BotMgr::LoadConfig(bool reload)
 
     _enableNpcBots                  = sConfigMgr->GetBoolDefault("NpcBot.Enable", true);
     _maxNpcBots                     = sConfigMgr->GetIntDefault("NpcBot.MaxBots", 1);
+    _meowmNpcBots                   = sConfigMgr->GetIntDefault("NpcBot.MeowMBots", 2);
+    _gmnpcbots                      = sConfigMgr->GetIntDefault("NpcBot.GMBots", 4);
     _maxClassNpcBots                = sConfigMgr->GetIntDefault("NpcBot.MaxBotsPerClass", 1);
     _filterRaces                    = sConfigMgr->GetBoolDefault("NpcBot.Botgiver.FilterRaces", false);
     _basefollowdist                 = sConfigMgr->GetIntDefault("NpcBot.BaseFollowDistance", 30);

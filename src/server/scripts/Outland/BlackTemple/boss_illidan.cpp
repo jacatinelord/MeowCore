@@ -15,10 +15,9 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "CreatureScript.h"
+#include "ScriptMgr.h"
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
-#include "SpellScriptLoader.h"
 #include "black_temple.h"
 
 enum Says
@@ -230,6 +229,7 @@ public:
             me->CastSpell(me, SPELL_DUAL_WIELD, true);
             me->LoadEquipment(0, true);
             me->SetImmuneToAll(true);
+            me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             beamPosId = urand(0, 3);
         }
 
@@ -486,6 +486,7 @@ public:
                 case EVENT_SPELL_BERSERK:
                     Talk(SAY_ILLIDAN_ENRAGE);
                     me->CastSpell(me, SPELL_BERSERK, true);
+                    me->SetImmuneToAll(false);
                     break;
                 case EVENT_SPELL_FLAME_CRASH:
                     me->CastSpell(me->GetVictim(), SPELL_FLAME_CRASH, false);
@@ -797,6 +798,7 @@ public:
             me->SetNpcFlag(UNIT_NPC_FLAG_GOSSIP);
             me->setActive(false);
             me->SetVisible(instance->GetBossState(DATA_ILLIDARI_COUNCIL) == DONE && instance->GetBossState(DATA_ILLIDAN_STORMRAGE) != DONE);
+            me->SetImmuneToAll(false);
             events.Reset();
             summons.DespawnAll();
         }
@@ -806,6 +808,7 @@ public:
             CloseGossipMenuFor(player);
             me->ReplaceAllNpcFlags(UNIT_NPC_FLAG_NONE);
             me->setActive(true);
+            me->SetImmuneToAll(false);
 
             if (instance->GetBossState(DATA_AKAMA_FINISHED) != DONE)
             {
@@ -925,6 +928,7 @@ public:
                 case EVENT_AKAMA_SCENE_20:
                     if (Creature* illidan = ObjectAccessor::GetCreature(*me, instance->GetGuidData(NPC_ILLIDAN_STORMRAGE)))
                         illidan->SetStandState(UNIT_STAND_STATE_STAND);
+                        
                     break;
                 case EVENT_AKAMA_SCENE_21:
                     me->SetFacingTo(M_PI);
@@ -959,6 +963,7 @@ public:
                     if (Creature* illidan = ObjectAccessor::GetCreature(*me, instance->GetGuidData(NPC_ILLIDAN_STORMRAGE)))
                     {
                         illidan->SetImmuneToAll(false);
+                        illidan->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                         illidan->SetInCombatWithZone();
                         AttackStart(illidan);
                     }
@@ -1427,4 +1432,3 @@ void AddSC_boss_illidan()
     new spell_illidan_cage_trap();
     new spell_illidan_cage_trap_stun();
 }
-
