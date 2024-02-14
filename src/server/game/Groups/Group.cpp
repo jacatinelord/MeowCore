@@ -70,7 +70,7 @@ Loot* Roll::getLoot()
 
 Group::Group() : m_leaderName(""), m_groupType(GROUPTYPE_NORMAL),
     m_dungeonDifficulty(DUNGEON_DIFFICULTY_NORMAL), m_raidDifficulty(RAID_DIFFICULTY_10MAN_NORMAL),
-    m_bfGroup(nullptr), m_bgGroup(nullptr), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
+    m_bfGroup(nullptr), m_bgGroup(nullptr), m_lootMethod(GROUP_LOOT), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
     m_subGroupsCounts(nullptr), m_counter(0), m_maxEnchantingLevel(0), _difficultyChangePreventionTime(0),
     _difficultyChangePreventionType(DIFFICULTY_PREVENTION_CHANGE_NONE)
 {
@@ -126,7 +126,7 @@ bool Group::Create(Creature* leader)
 
     _initRaidSubGroupsCounter();
 
-    m_lootMethod = FREE_FOR_ALL;
+    m_lootMethod = GROUP_LOOT;
 
     m_lootThreshold = ITEM_QUALITY_UNCOMMON;
     m_looterGuid = leaderGuid;
@@ -163,7 +163,7 @@ bool Group::Create(Player* leader)
     if (leader->HaveBot()) //player + npcbot so set to free-for-all on create
     {
         if (!isLFGGroup())
-            m_lootMethod = FREE_FOR_ALL;
+            m_lootMethod = GROUP_LOOT;
     }
     else
     //end npcbot
