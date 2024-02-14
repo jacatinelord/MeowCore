@@ -1800,8 +1800,8 @@ namespace lfg
                     {
                         //only one player in group
                         ChatHandler ch(player->GetSession());
-                        ch.SendSysMessage("You are the only player in your group, loot method set to Free For All");
-                        grp->SetLootMethod(FREE_FOR_ALL);
+                        ch.SendSysMessage("Loot Method Is Set To Need Before Greed");
+                        grp->SetLootMethod(NEED_BEFORE_GREED);
                     }
                 }
 
