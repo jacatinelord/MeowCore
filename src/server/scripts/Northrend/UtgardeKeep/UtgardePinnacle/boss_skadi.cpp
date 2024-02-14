@@ -147,6 +147,7 @@ public:
             me->SetControlled(false, UNIT_STATE_ROOT);
             me->UpdatePosition(343.02f, -507.325f, 104.567f, M_PI, true);
             me->StopMovingOnCurrentPos();
+            me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
 
             if(m_pInstance)
             {
@@ -176,6 +177,7 @@ public:
 
                 me->SetControlled(true, UNIT_STATE_ROOT);
                 me->SetInCombatWithZone();
+                me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                 events.RescheduleEvent(EVENT_SKADI_START, 2s);
             }
         }
@@ -209,10 +211,12 @@ public:
             {
                 case EVENT_SKADI_START:
                     {
+                        
                         me->SetControlled(false, UNIT_STATE_ROOT);
                         if (Creature* cr = GetGrauf())
                         {
                             me->EnterVehicleUnattackable(cr, 0);
+                            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                             cr->AI()->DoAction(ACTION_START_EVENT);
                         }
                         else
@@ -298,6 +302,7 @@ public:
             currentPos = 0;
             AchievementHitCount = 0;
             me->RemoveAllAuras();
+            me->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
 
         void DoAction(int32 param) override
@@ -390,6 +395,7 @@ public:
         void JustEngagedWith(Unit*) override
         {
             me->SetInCombatWithZone();
+            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
         }
 
         void RemoveSkadi(bool withEvade)
@@ -398,6 +404,7 @@ public:
             {
                 summons.DespawnAll();
                 skadi->ExitVehicle();
+                skadi->RemoveUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
                 if (withEvade)
                 {
                     skadi->ToCreature()->AI()->EnterEvadeMode();
@@ -512,7 +519,7 @@ public:
 
                 if (Creature* grauf = ObjectAccessor::GetCreature(*pPlayer, m_pInstance->GetGuidData(DATA_GRAUF)))
                 {
-                    if (count >= 3)
+                    if (count >= 8)
                     {
                         m_pInstance->SetData(SKADI_IN_RANGE, 0);
                         grauf->AI()->DoAction(ACTION_REMOVE_SKADI);
