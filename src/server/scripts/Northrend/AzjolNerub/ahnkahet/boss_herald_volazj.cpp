@@ -29,15 +29,16 @@ enum Spells
     SPELL_MIND_FLAY                         = 57941,
     SPELL_SHADOW_BOLT_VOLLEY                = 57942,
     SPELL_SHIVER                            = 57949,
+    SPELL_CHARMING                          = 24327,
 
     // INSANITY
-    SPELL_INSANITY                          = 57496, //Dummy
-    INSANITY_VISUAL                         = 57561,
-    SPELL_INSANITY_TARGET                   = 57508,
-    SPELL_CLONE_PLAYER                      = 57507, //casted on player during insanity
-    SPELL_INSANITY_PHASING_1                = 57508,
-    SPELL_INSANITY_PHASING_2                = 57509,
-    SPELL_INSANITY_PHASING_3                = 57510,
+    SPELL_INSANITY                          = 57496, //Dummy 57496
+    INSANITY_VISUAL                         = 24327,
+    SPELL_INSANITY_TARGET                   = 24327,
+    SPELL_CLONE_PLAYER                      = 24327, //casted on player during insanity 57507
+    SPELL_INSANITY_PHASING_1                = 24327,
+    SPELL_INSANITY_PHASING_2                = 24327,
+    SPELL_INSANITY_PHASING_3                = 24327,
     SPELL_INSANITY_PHASING_4                = 57511,
     SPELL_INSANITY_PHASING_5                = 57512,
 
@@ -81,6 +82,7 @@ enum Misc
 enum Events
 {
     EVENT_HERALD_MIND_FLAY                  = 1,
+    EVENT_HERALD_CHARMING,
     EVENT_HERALD_SHADOW,
     EVENT_HERALD_SHIVER,
 };
@@ -117,6 +119,7 @@ struct boss_volazj : public BossAI
     {
         _JustEngagedWith();
         events.ScheduleEvent(EVENT_HERALD_MIND_FLAY, 8s);
+        events.ScheduleEvent(EVENT_HERALD_CHARMING, 20s);
         events.ScheduleEvent(EVENT_HERALD_SHADOW, 5s);
         events.ScheduleEvent(EVENT_HERALD_SHIVER, 15s);
         Talk(SAY_AGGRO);
@@ -194,12 +197,18 @@ struct boss_volazj : public BossAI
         }
 
         // First insanity
-        if (insanityTimes == 0 && me->HealthBelowPctDamaged(66, damage))
+        if (insanityTimes == 0 && me->HealthBelowPctDamaged(87, damage))
         {
             DoCastSelf(SPELL_INSANITY, false);
             ++insanityTimes;
         }
         // Second insanity
+        else if (insanityTimes == 1 && me->HealthBelowPctDamaged(66, damage))
+        {
+            DoCastSelf(SPELL_INSANITY, false);
+            ++insanityTimes;
+        }
+        // third insanity
         else if (insanityTimes == 1 && me->HealthBelowPctDamaged(33, damage))
         {
             me->InterruptNonMeleeSpells(false);
@@ -243,6 +252,12 @@ struct boss_volazj : public BossAI
                 {
                     DoCastVictim(SPELL_MIND_FLAY, false);
                     events.Repeat(20s);
+                    break;
+                }
+                case EVENT_HERALD_CHARMING:
+                {
+                    DoCastVictim(SPELL_CHARMING, false);
+                    events.Repeat(25s);
                     break;
                 }
                 case EVENT_HERALD_SHADOW:
