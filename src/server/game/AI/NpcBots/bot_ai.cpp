@@ -6120,7 +6120,6 @@ void bot_ai::CheckUsableItems(uint32 diff)
 
                 if (!castTarget)
                     continue;
-
                 SpellCastTargets targets;
                 targets.SetUnitTarget(castTarget);
                 _castBotItemUseSpell(item, targets);
@@ -9832,6 +9831,7 @@ bool bot_ai::OnGossipSelect(Player* player, Creature* creature/* == me*/, uint32
                         break;
 
                     // cast item spell
+                    player->DestroyItemCount(item->GetEntry(), 1, true);
                     SpellCastTargets targets;
                     targets.SetUnitTarget(me);
                     _castBotItemUseSpell(item, targets);
