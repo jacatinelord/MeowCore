@@ -3550,6 +3550,8 @@ public:
             ss << "No free bots found!";
         else
         {
+            std::string deletenpcbotdatafirst = "TRUNCATE TABLE npcbot_online_list";
+            QueryResult npcbotonlinedata_delete = CharacterDatabase.Query(deletenpcbotdatafirst);
             ss << "Found " << uint32(free_bots.size()) << " free bots:";
             uint32 counter = 0;
             for (Creature const *bot : free_bots)
@@ -3568,6 +3570,17 @@ public:
                    << bot->GetName() << " - |c" << bot_color_str << bot_class_str << "|r - "
                    << "level " << uint32(bot->GetLevel()) << " - \"" << zone_name << '"'
                    << (bot->GetBotAI()->HasRealEquipment() ? " |cff00ffff(has equipment!)|r" : "");
+                if (zone_name != "Searing George")
+                {
+                    std::string stringzonename = zone_name;
+                    std::string stringbotname = bot->GetName();
+
+                    stringzonename.erase(std::remove(stringzonename.begin(), stringzonename.end(), '\''), stringzonename.end());
+                    stringbotname.erase(std::remove(stringbotname.begin(), stringbotname.end(), '\''), stringbotname.end());
+
+                    std::string inputlastestnpcbotonlinedata = "INSERT INTO npcbot_online_list (`Name`, `Class`, `Level`, `Area`) VALUES ( '" + stringbotname + "',  '" + bot_class_str + "', '" + std::to_string(bot->GetLevel()) + "', '" + stringzonename + "')";
+                    QueryResult npcbotonlinedata = CharacterDatabase.Query(inputlastestnpcbotonlinedata);
+                }
             }
         }
 

@@ -475,7 +475,7 @@ void bot_ai::CheckOwnerExpiry()
     time_t timeNow = time(0);
     time_t expireTime = time_t(BotMgr::GetOwnershipExpireTime());
     uint32 accId = sCharacterCache->GetCharacterAccountIdByGuid(ownerGuid);
-    QueryResult result = accId ? LoginDatabase.Query("SELECT UNIX_TIMESTAMP(last_login) FROM account WHERE id = {}", accId) : nullptr;
+    QueryResult result = accId ? LoginDatabase.Query("SELECT UNIX_TIMESTAMP(updated_last_activity) FROM account WHERE id = {}", accId) : nullptr;
 
     Field* fields = result ? result->Fetch() : nullptr;
     time_t lastLoginTime = fields ? time_t(fields[0].Get<uint32>()) : timeNow;
