@@ -312,7 +312,7 @@ public:
                         if (CheckCaravan())
                             player->GroupEventHappens(QUEST_BODYGUARD_FOR_HIRE, player);
                         else
-                            player->FailQuest(QUEST_BODYGUARD_FOR_HIRE);
+                            player->GroupEventHappens(QUEST_BODYGUARD_FOR_HIRE, player);
                     }
                     _playerGUID.Clear();
                     CheckPlayer();
@@ -324,7 +324,7 @@ public:
                         if (CheckCaravan())
                             player->GroupEventHappens(QUEST_GIZELTON_CARAVAN, player);
                         else
-                            player->FailQuest(QUEST_GIZELTON_CARAVAN);
+                            player->GroupEventHappens(QUEST_GIZELTON_CARAVAN, player);
                     }
                     _playerGUID.Clear();
                     CheckPlayer();
