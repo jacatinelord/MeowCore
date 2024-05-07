@@ -39,6 +39,10 @@
 #include <G3D/CoordinateFrame.h>
 #include <G3D/Quat.h>
 
+//npcbot
+#include "botmgr.h"
+//end npcbot
+
 GameObject::GameObject() : WorldObject(false), MovableMapObject(),
     m_model(nullptr), m_goValue(), m_AI(nullptr)
 {
@@ -406,7 +410,7 @@ bool GameObject::Create(ObjectGuid::LowType guidlow, uint32 name_id, Map* map, u
         }
     }
 
-    LastUsedScriptID = GetGOInfo()->ScriptId;
+    LastUsedScriptID = GetScriptId();
     AIM_Initialize();
 
     if (uint32 linkedEntry = GetGOInfo()->GetLinkedGameObjectEntry())
@@ -512,7 +516,7 @@ void GameObject::Update(uint32 diff)
                                     UpdateData udata;
                                     WorldPacket packet;
                                     BuildValuesUpdateBlockForPlayer(&udata, caster->ToPlayer());
-                                    udata.BuildPacket(&packet);
+                                    udata.BuildPacket(packet);
                                     caster->ToPlayer()->GetSession()->SendPacket(&packet);
 
                                     SendCustomAnim(GetGoAnimProgress());
@@ -1140,6 +1144,7 @@ bool GameObject::LoadGameObjectFromDB(ObjectGuid::LowType spawnId, Map* map, boo
     GOState go_state = data->go_state;
     uint32 artKit = data->artKit;
 
+    m_goData = data;
     m_spawnId = spawnId;
 
     if (!Create(map->GenerateLowGuid<HighGuid::GameObject>(), entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state, artKit))
@@ -1174,8 +1179,6 @@ bool GameObject::LoadGameObjectFromDB(ObjectGuid::LowType spawnId, Map* map, boo
         m_respawnDelayTime = -data->spawntimesecs;
         m_respawnTime = 0;
     }
-
-    m_goData = data;
 
     if (addToMap && !GetMap()->AddToMap(this))
         return false;
@@ -1817,6 +1820,39 @@ void GameObject::Use(Unit* user)
 
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
             {
+                //npcbot
+                if (user->IsNPCBot())
+                {
+                    GameObjectTemplate const* info = GetGOInfo();
+                    Player* botOwner = user->ToCreature()->GetBotOwner();
+                    spellCaster = botOwner;
+
+                    if (info->summoningRitual.animSpell)
+                    {
+                        user->CastSpell(user, info->summoningRitual.animSpell, true);
+                        triggered = true;
+                    }
+
+                    spellId = info->summoningRitual.spellId;
+                    if (spellId == 62330)
+                    {
+                        spellId = 61993;
+                        triggered = true;
+                    }
+                    if (!info->summoningRitual.ritualPersistent)
+                        SetLootState(GO_JUST_DEACTIVATED);
+                    else
+                    {
+                        // reset ritual for this GO
+                        m_ritualOwnerGUID.Clear();
+                        m_unique_users.clear();
+                        m_usetimes = 0;
+                    }
+
+                    break;
+                }
+                //end npcbot
+
                 if (user->GetTypeId() != TYPEID_PLAYER)
                     return;
 
@@ -1886,6 +1922,28 @@ void GameObject::Use(Unit* user)
                 if (info->spellcaster.partyOnly)
                 {
                     Player const* caster = ObjectAccessor::FindConnectedPlayer(GetOwnerGUID());
+                    //npcbot
+                    if (!caster && GetOwnerGUID().IsCreature() && user->IsPlayer())
+                    {
+                        if (Creature const* bot = user->ToPlayer()->GetBotMgr()->GetBot(GetOwnerGUID()))
+                            caster = user->ToPlayer();
+                        else if (Group const* group = user->ToPlayer()->GetGroup())
+                        {
+                            for (GroupReference const* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                            {
+                                if (Player const* player = itr->GetSource())
+                                {
+                                    bot = player->GetBotMgr()->GetBot(GetOwnerGUID());
+                                    if (bot)
+                                    {
+                                        caster = player;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    //end npcbot
                     if (!caster || user->GetTypeId() != TYPEID_PLAYER || !user->ToPlayer()->IsInSameRaidWith(caster))
                         return;
                 }
@@ -2784,7 +2842,7 @@ GameObject* GameObject::GetLinkedTrap()
     return ObjectAccessor::GetGameObject(*this, m_linkedTrap);
 }
 
-void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target) const
+void GameObject::BuildValuesUpdate(uint8 updateType, ByteBuffer* data, Player* target)
 {
     if (!target)
         return;

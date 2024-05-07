@@ -667,7 +667,7 @@ bool Group::AddMember(Player* player)
                         player->BuildValuesUpdateBlockForPlayer(&newData, itrMember);
                         if (newData.HasData())
                         {
-                            newData.BuildPacket(&newDataPacket);
+                            newData.BuildPacket(newDataPacket);
                             itrMember->SendDirectMessage(&newDataPacket);
                         }
                     }
@@ -676,7 +676,7 @@ bool Group::AddMember(Player* player)
 
             if (groupData.HasData())
             {
-                groupData.BuildPacket(&groupDataPacket);
+                groupData.BuildPacket(groupDataPacket);
                 player->SendDirectMessage(&groupDataPacket);
             }
 
@@ -2294,7 +2294,7 @@ GroupJoinBattlegroundResult Group::CanJoinBattlegroundQueue(Battleground const* 
             return ERR_IN_NON_RANDOM_BG;
 
         // don't let Death Knights join BG queues when they are not allowed to be teleported yet
-        if (member->getClass() == CLASS_DEATH_KNIGHT && member->GetMapId() == 609 && !member->IsGameMaster() && !member->HasSpell(50977))
+        if (member->IsClass(CLASS_DEATH_KNIGHT, CLASS_CONTEXT_TELEPORT) && member->GetMapId() == 609 && !member->IsGameMaster() && !member->HasSpell(50977))
             return ERR_GROUP_JOIN_BATTLEGROUND_FAIL;
 
         if (!member->GetBGAccessByLevel(bgTemplate->GetBgTypeID()))

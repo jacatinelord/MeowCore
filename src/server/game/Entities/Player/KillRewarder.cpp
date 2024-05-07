@@ -175,7 +175,17 @@ void KillRewarder::_RewardXP(Player* player, float rate)
             AddPct(xp, (*i)->GetAmount());
 
         //npcbot 4.2.2.1. Apply NpcBot XP reduction
-        uint8 bots_count = player->GetNpcBotsCount();
+        uint8 bots_count = 0;
+        if (_group)
+        {
+            for (GroupReference const* itr = _group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                if (Player const* gPlayer = itr->GetSource())
+                    bots_count = std::max<uint8>(bots_count, gPlayer->GetNpcBotsCount());
+            }
+        }
+        else
+            bots_count = player->GetNpcBotsCount();
         uint8 xp_reduction = BotMgr::GetNpcBotXpReduction();
         uint8 xp_reduction_start = BotMgr::GetNpcBotXpReductionStartingNumber();
         if (xp_reduction_start > 0 && xp_reduction > 0 && bots_count >= xp_reduction_start)
@@ -223,12 +233,13 @@ void KillRewarder::_RewardPlayer(Player* player, bool isDungeon)
         if (_victim->GetTypeId() == TYPEID_PLAYER)
             player->KilledPlayerCredit();
     }
+
     // Give XP only in PvE or in battlegrounds.
     // Give reputation and kill credit only in PvE.
     if (!_isPvP || _isBattleGround)
     {
         float xpRate = _group ? _groupRate * float(player->GetLevel()) / _aliveSumLevel : /*Personal rate is 100%.*/ 1.0f; // Group rate depends on the sum of levels.
-        sScriptMgr->OnRewardKillRewarder(player, isDungeon, xpRate);                                              // Personal rate is 100%.
+        sScriptMgr->OnRewardKillRewarder(player, this, isDungeon, xpRate);                                              // Personal rate is 100%.
 
         if (_xp)
         {
@@ -308,4 +319,14 @@ void KillRewarder::Reward()
         if (victim->IsDungeonBoss())
             if (Map* map = _victim->FindMap())
                 map->UpdateEncounterState(ENCOUNTER_CREDIT_KILL_CREATURE, _victim->GetEntry(), _victim);
+}
+
+Unit* KillRewarder::GetVictim()
+{
+    return _victim;
+}
+
+Player* KillRewarder::GetKiller()
+{
+    return _killer;
 }
