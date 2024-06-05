@@ -209,6 +209,11 @@ public:
             {
                 cr->SetInCombatWithZone();
                 cr->AI()->AttackStart(who);
+                cr->SetLevel(82);
+            }
+            if (Creature* crz = me->FindNearestCreature(NPC_DEATH_KNIGHT_UNDERSTUDY, 500.0f))
+            {
+                crz->SetLevel(82);
             }
         }
 
