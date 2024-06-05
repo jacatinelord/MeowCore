@@ -279,6 +279,12 @@ uint32 AuctionHouseMgr::GetAuctionDeposit(AuctionHouseEntry const* entry, uint32
     LOG_DEBUG("auctionHouse", "Multiplier: {}", multiplier);
     LOG_DEBUG("auctionHouse", "Deposit:    {}", deposit);
 
+// Print the values using std::cout
+    std::cout << "MSV:        " << MSV << std::endl;
+    std::cout << "Items:      " << count << std::endl;
+    std::cout << "Multiplier: " << multiplier << std::endl;
+    std::cout << "Deposit:    " << deposit << std::endl;
+
     if (deposit < AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT))
         return AH_MINIMUM_DEPOSIT * sWorld->getRate(RATE_AUCTION_DEPOSIT);
     else
