@@ -2,6 +2,7 @@
 #include "botdatamgr.h"
 #include "botdump.h"
 #include "botgearscore.h"
+#include "botlog.h"
 #include "botmgr.h"
 #include "botwanderful.h"
 #include "Bag.h"
@@ -672,6 +673,12 @@ public:
 
     ChatCommandTable GetCommands() const override
     {
+        static ChatCommandTable npcbotLogCommandTable =
+        {
+            //{ "testwrite",  HandleNpcBotLogTestWriteCommand,        rbac::RBAC_PERM_COMMAND_NPCBOT_DUMP_WRITE,         Console::Yes },
+            { "clear",      HandleNpcBotLogClearCommand,            rbac::RBAC_PERM_COMMAND_NPCBOT_DUMP_WRITE,         Console::Yes },
+        };
+
         static ChatCommandTable npcbotToggleCommandTable =
             {
                 {"flags", HandleNpcBotToggleFlagsCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_TOGGLE_FLAGS, Console::No},
@@ -810,38 +817,39 @@ public:
             };
 
         static ChatCommandTable npcbotCommandTable =
-            {
-                //{ "debug",      npcbotDebugCommandTable                                                                                 },
-                //{ "toggle",     npcbotToggleCommandTable                                                                                },
-                {"set", npcbotSetCommandTable},
-                {"add", HandleNpcBotAddCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_ADD, Console::No},
-                {"remove", HandleNpcBotRemoveCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_REMOVE, Console::No},
-                {"createnew", HandleNpcBotCreateNewCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_CREATENEW, Console::Yes},
-                {"spawn", HandleNpcBotSpawnCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN, Console::No},
-                {"move", HandleNpcBotMoveCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_MOVE, Console::No},
-                {"delete", npcbotDeleteCommandTable},
-                {"lookup", HandleNpcBotLookupCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_LOOKUP, Console::Yes},
-                {"list", npcbotListCommandTable},
-                {"revive", HandleNpcBotReviveCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_REVIVE, Console::No},
-                {"reloadconfig", HandleNpcBotReloadConfigCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_RELOADCONFIG, Console::Yes},
-                {"useonbot", npcbotUseOnBotCommandTable},
-                {"command", npcbotCommandCommandTable},
-                {"info", HandleNpcBotInfoCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_INFO, Console::Yes},
-                {"hide", HandleNpcBotHideCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_HIDE, Console::No},
-                {"unhide", HandleNpcBotUnhideCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE, Console::No},
-                {"show", HandleNpcBotUnhideCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE, Console::No},
-                {"recall", npcbotRecallCommandTable},
-                {"kill", HandleNpcBotKillCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_KILL, Console::No},
-                {"suicide", HandleNpcBotKillCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_KILL, Console::No},
-                {"go", HandleNpcBotGoCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_MOVE, Console::No},
-                {"gs", HandleNpcBotGearScoreCommand, rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_MISC, Console::No},
-                {"sendto", npcbotSendToCommandTable},
-                {"distance", npcbotDistanceCommandTable},
-                {"order", npcbotOrderCommandTable},
-                {"vehicle", npcbotVehicleCommandTable},
-                {"dump", npcbotDumpCommandTable},
-                {"wp", npcbotWPCommandTable},
-            };
+        {
+            //{ "debug",      npcbotDebugCommandTable                                                                                 },
+            //{ "toggle",     npcbotToggleCommandTable                                                                                },
+            { "set",        npcbotSetCommandTable                                                                                   },
+            { "add",        HandleNpcBotAddCommand,                 rbac::RBAC_PERM_COMMAND_NPCBOT_ADD,                Console::No  },
+            { "remove",     HandleNpcBotRemoveCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_REMOVE,             Console::No  },
+            { "createnew",  HandleNpcBotCreateNewCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_CREATENEW,          Console::Yes },
+            { "spawn",      HandleNpcBotSpawnCommand,               rbac::RBAC_PERM_COMMAND_NPCBOT_SPAWN,              Console::No  },
+            { "move",       HandleNpcBotMoveCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_MOVE,               Console::No  },
+            { "delete",     npcbotDeleteCommandTable                                                                                },
+            { "lookup",     HandleNpcBotLookupCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_LOOKUP,             Console::Yes },
+            { "list",       npcbotListCommandTable                                                                                  },
+            { "revive",     HandleNpcBotReviveCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_REVIVE,             Console::No  },
+            { "reloadconfig",HandleNpcBotReloadConfigCommand,       rbac::RBAC_PERM_COMMAND_NPCBOT_RELOADCONFIG,       Console::Yes },
+            { "useonbot",   npcbotUseOnBotCommandTable                                                                              },
+            { "command",    npcbotCommandCommandTable                                                                               },
+            { "info",       HandleNpcBotInfoCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_INFO,               Console::Yes },
+            { "hide",       HandleNpcBotHideCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_HIDE,               Console::No  },
+            { "unhide",     HandleNpcBotUnhideCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE,             Console::No  },
+            { "show",       HandleNpcBotUnhideCommand,              rbac::RBAC_PERM_COMMAND_NPCBOT_UNHIDE,             Console::No  },
+            { "recall",     npcbotRecallCommandTable                                                                                },
+            { "kill",       HandleNpcBotKillCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_KILL,               Console::No  },
+            { "suicide",    HandleNpcBotKillCommand,                rbac::RBAC_PERM_COMMAND_NPCBOT_KILL,               Console::No  },
+            { "go",         HandleNpcBotGoCommand,                  rbac::RBAC_PERM_COMMAND_NPCBOT_MOVE,               Console::No  },
+            { "gs",         HandleNpcBotGearScoreCommand,           rbac::RBAC_PERM_COMMAND_NPCBOT_COMMAND_MISC,       Console::No  },
+            { "sendto",     npcbotSendToCommandTable                                                                                },
+            { "distance",   npcbotDistanceCommandTable                                                                              },
+            { "order",      npcbotOrderCommandTable                                                                                 },
+            { "vehicle",    npcbotVehicleCommandTable                                                                               },
+            { "dump",       npcbotDumpCommandTable                                                                                  },
+            { "wp",         npcbotWPCommandTable                                                                                    },
+            { "log",        npcbotLogCommandTable                                                                                   },
+        };
 
         static ChatCommandTable commandTable =
             {
@@ -850,7 +858,33 @@ public:
         return commandTable;
     }
 
-    static TempSummon *HandleWPSummon(WanderNode *wp, Map *map)
+    static bool HandleNpcBotLogClearCommand(ChatHandler* handler)
+    {
+        CharacterDatabaseTransaction trans = CharacterDatabase.BeginTransaction();
+        trans->Append("TRUNCATE TABLE `characters_npcbot_logs`");
+        trans->Append("ALTER TABLE `characters_npcbot_logs` AUTO_INCREMENT = 0");
+        CharacterDatabase.CommitTransaction(trans);
+        handler->SendSysMessage("Table `characters_npcbot_logs` was cleared and autoincrement was reset");
+        return true;
+    }
+
+    static bool HandleNpcBotLogTestWriteCommand(ChatHandler* handler, Optional<std::underlying_type_t<BotLogType>> log_type, Optional<uint32> entry, Optional<std::vector<std::string>> extra)
+    {
+        if (!log_type || !entry)
+        {
+            handler->PSendSysMessage(".npcbot log testwrite #log_type #entry #[owner] #[mapid] #[inmap] #[inworld] #[params[1-%u]]", MAX_BOT_LOG_PARAMS);
+            handler->SendSysMessage("Test `characters_npcbot_logs` table write 2");
+            handler->SetSentErrorMessage(true);
+            return false;
+        }
+
+        decltype(extra)::value_type extras{ extra.value_or(decltype(extra)::value_type{}) };
+        extras.resize(MAX_BOT_LOG_PARAMS, "");
+        BotLogger::Log(*log_type, *entry, extras[0], extras[1], extras[2], extras[3], extras[4]);
+        return true;
+    }
+
+    static TempSummon* HandleWPSummon(WanderNode* wp, Map* map)
     {
         CellCoord c = Acore::ComputeCellCoord(wp->m_positionX, wp->m_positionY);
         GridCoord g = Acore::ComputeGridCoord(wp->m_positionX, wp->m_positionY);
