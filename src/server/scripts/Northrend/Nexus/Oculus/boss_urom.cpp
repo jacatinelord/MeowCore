@@ -160,7 +160,7 @@ public:
                     me->InterruptNonMeleeSpells(false);
 
                 events.RescheduleEvent(EVENT_FROSTBOMB, 7s, 11s);
-                events.RescheduleEvent(EVENT_TELEPORT_TO_CENTER, 30s, 35s);
+                events.RescheduleEvent(EVENT_TELEPORT_TO_CENTER, 8s, 12s);
                 events.RescheduleEvent(EVENT_TIME_BOMB, 20s, 25s);
             }
             else
@@ -344,7 +344,7 @@ public:
                     y = me->GetPositionY();
                     z = me->GetPositionZ();
                     me->CastSpell(me, SPELL_TELEPORT, false);
-                    events.Repeat(25s, 30s);
+                    events.Repeat(8s, 12s);
                     events.DelayEvents(10s);
                     break;
                 case EVENT_TELE_BACK:
