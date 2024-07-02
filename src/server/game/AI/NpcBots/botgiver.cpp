@@ -256,7 +256,8 @@ public:
 
                     if (player->HaveBot() && player->GetBotMgr()->GetBot(bot->GetGUID()))
                         WhisperTo(player, me, bot_ai::LocalizedNpcText(player, BOT_TEXT_BOTGIVER_HIRESUCCESS).c_str());
-
+                        std::string querySum = "UPDATE account SET `updated_last_activity` = NOW() WHERE id = " + std::to_string(player->GetSession()->GetAccountId());
+                        QueryResult resultSum = LoginDatabase.Query(querySum);
                     break;
                 }
             }
