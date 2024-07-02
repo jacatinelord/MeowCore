@@ -777,6 +777,9 @@ public:
                 me->GetMap()->LoadGrid(751.664f, 238.933f);
                 me->SetHomePosition(751.664f, 238.933f, 353.106f, 2.18f);
                 me->NearTeleportTo(751.664f, 238.933f, 353.106f, 2.18f);
+                // WTF IS THIS SHIT
+                me->SetVisible(true);
+                me->Respawn();
             }
         }
 
@@ -802,6 +805,9 @@ public:
                 me->NearTeleportTo(AkamaTeleport);
                 me->RemoveNpcFlag(UNIT_NPC_FLAG_GOSSIP);
                 me->GetMotionMaster()->MovePath(PATH_AKAMA_ILLIDARI_COUNCIL_1, false);
+                // WTF IS THIS SHIT
+                me->SetVisible(true);
+                me->Respawn();
             }
         }
 
@@ -812,6 +818,9 @@ public:
             me->setActive(false);
             me->SetVisible(instance->GetBossState(DATA_ILLIDARI_COUNCIL) == DONE && instance->GetBossState(DATA_ILLIDAN_STORMRAGE) != DONE);
             me->SetImmuneToAll(false);
+            // added shits
+            me->Respawn();
+            // end of added shits
             events.Reset();
             summons.DespawnAll();
         }
