@@ -639,7 +639,7 @@ void Creature::Update(uint32 diff)
     }
     //end npcbot
 
-    if (IsAIEnabled && TriggerJustRespawned)
+    if (IsAIEnabled && TriggerJustRespawned && m_deathState != DeathState::Dead)
     {
         TriggerJustRespawned = false;
         AI()->JustRespawned();
