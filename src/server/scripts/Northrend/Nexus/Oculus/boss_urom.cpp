@@ -160,8 +160,8 @@ public:
                     me->InterruptNonMeleeSpells(false);
 
                 events.RescheduleEvent(EVENT_FROSTBOMB, 7s, 11s);
-                events.RescheduleEvent(EVENT_TELEPORT_TO_CENTER, 8s, 12s);
-                events.RescheduleEvent(EVENT_TIME_BOMB, 20s, 25s);
+                events.RescheduleEvent(EVENT_TELEPORT_TO_CENTER, 12s, 15s);
+                events.RescheduleEvent(EVENT_TIME_BOMB, 16s, 20s);
             }
             else
             {
@@ -337,14 +337,14 @@ public:
                 case EVENT_TIME_BOMB:
                     if( Unit* target = SelectTarget(SelectTargetMethod::Random, 0, 100.0f, true) )
                         DoCast(target, DUNGEON_MODE(SPELL_TIME_BOMB_N, SPELL_TIME_BOMB_H));
-                    events.Repeat(20s, 25s);
+                    events.Repeat(16s, 20s);
                     break;
                 case EVENT_TELEPORT_TO_CENTER:
                     x = me->GetPositionX();
                     y = me->GetPositionY();
                     z = me->GetPositionZ();
                     me->CastSpell(me, SPELL_TELEPORT, false);
-                    events.Repeat(8s, 12s);
+                    events.Repeat(12s, 15s);
                     events.DelayEvents(10s);
                     break;
                 case EVENT_TELE_BACK:
