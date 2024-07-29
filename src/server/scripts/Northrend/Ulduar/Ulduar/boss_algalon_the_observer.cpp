@@ -487,7 +487,7 @@ public:
             uint32 introDelay = 0;
             me->setActive(true);
             me->SetInCombatWithZone();
-            me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
+            //me->SetUnitFlag(UNIT_FLAG_NOT_SELECTABLE);
             me->SetImmuneToNPC(true);
             events.Reset();
             events.SetPhase(PHASE_ROLE_PLAY);
@@ -495,14 +495,14 @@ public:
             if (!_firstPull)
             {
                 events.ScheduleEvent(EVENT_START_COMBAT, 0ms);
-                introDelay = 8000;
+                introDelay = 500;
             }
             else
             {
                 summons.DespawnEntry(NPC_AZEROTH);
                 _firstPull = false;
                 Talk(SAY_ALGALON_START_TIMER);
-                introDelay = 22000;
+                introDelay = 500;
                 events.ScheduleEvent(EVENT_START_COMBAT, 14s);
                 m_pInstance->SetData(DATA_DESPAWN_ALGALON, 0);
             }

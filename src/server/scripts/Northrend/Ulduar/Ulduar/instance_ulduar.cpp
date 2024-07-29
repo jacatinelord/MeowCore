@@ -772,12 +772,14 @@ public:
                     return;
                 case DATA_DESPAWN_ALGALON:
                     DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 1);
-                    DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, 60);
-                    m_algalonTimer = 60;
+                    DoUpdateWorldState(WORLD_STATE_ALGALON_DESPAWN_TIMER, m_algalonTimer);
                     _events.RescheduleEvent(EVENT_UPDATE_ALGALON_TIMER, 1min);
                     SaveToDB();
                     return;
                 case DATA_ALGALON_SUMMON_STATE:
+                    m_algalonTimer = 60;
+                    SaveToDB();
+                    return;
                 case DATA_ALGALON_DEFEATED:
                     DoUpdateWorldState(WORLD_STATE_ALGALON_TIMER_ENABLED, 0);
                     m_algalonTimer = (type == DATA_ALGALON_DEFEATED ? TIMER_ALGALON_DEFEATED : TIMER_ALGALON_SUMMONED);
