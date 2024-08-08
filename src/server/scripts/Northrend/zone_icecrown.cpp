@@ -1300,8 +1300,9 @@ public:
             events.ScheduleEvent(EVENT_TAKE_PASSENGER, 3000);
             me->SetCanFly(true);
             me->AddUnitMovementFlag(MOVEMENTFLAG_FLYING);
-            me->SetSpeed(MOVE_FLIGHT, 0.1f);
+            me->SetSpeed(MOVE_FLIGHT, 0.7f);
             me->SetFaction(player->GetFaction());
+            me->AddAura(1908, me);
         }
 
         void DamageTaken(Unit* who, uint32&, DamageEffectType, SpellSchoolMask) override
@@ -1322,6 +1323,7 @@ public:
                 {
                     me->TextEmote("Your Vehicle is burning!", GetSummoner(), true);
                     passenger->AddAura(SPELL_BURNING, passenger);
+                    me->AddAura(1908, me);
                 }
 
             for (uint8 seat = 3; seat <= 5; ++seat)
@@ -1353,7 +1355,8 @@ public:
                     break;
                 case EVENT_START_FLIGHT:
                     {
-                        WPPath* path = sSmartWaypointMgr->GetPath(me->GetEntry());
+                        //WPPath* path = sSmartWaypointMgr->GetPath(me->GetEntry());
+                        WPPath* path = sSmartWaypointMgr->GetPath(31406);
                         if (!path || path->empty())
                         {
                             me->DespawnOrUnsummon(1);
