@@ -286,10 +286,11 @@ public:
 
     struct npc_auriaya_sanctum_sentryAI : public ScriptedAI
     {
-        npc_auriaya_sanctum_sentryAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+        npc_auriaya_sanctum_sentryAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature) { }
 
         uint32 _savagePounceTimer;
         uint32 _ripFleshTimer;
+        SummonList summons;
 
         void JustEngagedWith(Unit*) override
         {
@@ -300,6 +301,7 @@ public:
 
         void Reset() override
         {
+            summons.DespawnAll();
             _savagePounceTimer = 5000;
             _ripFleshTimer = 0;
 
