@@ -64,6 +64,7 @@ enum Progress
 enum Events
 {
     EVENT_CHECK_PLAYERS = 1,
+    EVENT_RESET_THREAT_AND_SWITCH_TARGET = 2,
     EVENT_OPEN_GATE,
     EVENT_CLOSE_GATE,
 

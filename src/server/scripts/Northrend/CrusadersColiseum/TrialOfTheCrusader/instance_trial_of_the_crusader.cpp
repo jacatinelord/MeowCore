@@ -791,7 +791,7 @@ public:
                             // move Icehowl to side, can't remove corpse because of loot!
                             if( Creature* icehowl = instance->GetCreature(NPC_IcehowlGUID) )
                             {
-                                icehowl->UpdatePosition(513.19f, 139.48f, 395.22f, 3 * M_PI / 2, true);
+                                icehowl->UpdatePosition(626.57f, 162.8f, 140.25f, 4.44f, true);
                                 icehowl->StopMovingOnCurrentPos();
                                 icehowl->DestroyForNearbyPlayers();
                             }
@@ -958,7 +958,7 @@ public:
                         // move Jaraxxus to side, can't remove corpse because of loot!
                         if( Creature* jaraxxus = instance->GetCreature(NPC_JaraxxusGUID) )
                         {
-                            jaraxxus->UpdatePosition(613.83f, 139.5f, 395.22f, 3 * M_PI / 2, true);
+                            jaraxxus->UpdatePosition(603.92f, 102.61f, 141.85f, 1.4f, true);
                             jaraxxus->StopMovingOnCurrentPos();
                             jaraxxus->DestroyForNearbyPlayers();
                         }
