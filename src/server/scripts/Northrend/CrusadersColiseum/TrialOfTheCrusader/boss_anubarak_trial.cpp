@@ -759,6 +759,11 @@ public:
             if (TargetGUID)
                 if( Unit* target = ObjectAccessor::GetPlayer(*me, TargetGUID) )
                     target->RemoveAura(SPELL_MARK);
+                    me->RemoveAura(SPELL_SPIKE_SPEED2);
+                    me->RemoveAura(SPELL_SPIKE_SPEED3);
+                    me->CastSpell(me, SPELL_SPIKE_SPEED1, true);
+                    me->CastSpell(me, SPELL_SPIKE_TRAIL, true);
+                    events.RescheduleEvent(1, 4s);
             TargetGUID.Clear();
             if (!next)
             {
