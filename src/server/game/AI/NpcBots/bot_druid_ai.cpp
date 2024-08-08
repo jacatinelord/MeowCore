@@ -259,7 +259,7 @@ public:
         void KilledUnit(Unit* u) override { bot_ai::KilledUnit(u); }
         void EnterEvadeMode(EvadeReason why = EVADE_REASON_OTHER) override { bot_ai::EnterEvadeMode(why); }
         void MoveInLineOfSight(Unit* u) override { bot_ai::MoveInLineOfSight(u); }
-        void JustDied(Unit* u) override { removeShapeshiftForm(); UnsummonAll(); bot_ai::JustDied(u); }
+        void JustDied(Unit* u) override { removeShapeshiftForm(); UnsummonAll(false); bot_ai::JustDied(u); }
 
         uint8 GetBotStance() const override
         {
@@ -1760,7 +1760,7 @@ public:
             damage = int32(fdamage * (1.0f + pctbonus));
         }
 
-        void ApplyClassSpellCritMultiplierAll(Unit const* /*victim*/, float& crit_chance, SpellInfo const* spellInfo, SpellSchoolMask /*schoolMask*/, WeaponAttackType /*attackType*/) const override
+        void ApplyClassSpellCritMultiplierAll(Unit const* victim, float& crit_chance, SpellInfo const* spellInfo, SpellSchoolMask /*schoolMask*/, WeaponAttackType /*attackType*/) const override
         {
             //uint32 spellId = spellInfo->Id;
             uint32 baseId = spellInfo->GetFirstRankSpell()->Id;
@@ -1781,8 +1781,11 @@ public:
             //Eclipse (Lunar): 40% additional critical chance for Starfire
             if (lvl >= 50 && baseId == STARFIRE_1 && me->HasAura(ECLIPSE_LUNAR_BUFF))
                 crit_chance += 40.f;
+            //Improved Faerie Fire (part 2): 3% additional critical chance for all spells on target affected by Faerie Fire
+            if (GetSpec() == BOT_SPEC_DRUID_BALANCE && lvl >= 40 && victim && victim->HasAuraState(AURA_STATE_FAERIE_FIRE))
+                crit_chance += 3.f;
             //Natural Perfection: 3% additional critical chance for all spells
-            if ((GetSpec() == BOT_SPEC_DRUID_RESTORATION) && lvl >= 40)
+            if (GetSpec() == BOT_SPEC_DRUID_RESTORATION && lvl >= 40)
                 crit_chance += 3.f;
         }
 
@@ -2351,6 +2354,12 @@ public:
                             app->ChangeAmount((app->GetAmount() * 14) / 10);
                 }
             }
+            if ((baseId == FAERIE_FIRE_NORMAL_1 || baseId == FAERIE_FIRE_FERAL_1) && lvl >= 40)
+            {
+                //Improved Faerie Fire (part 1): incrase crit chance taken by 3% (effect2)
+                if (AuraEffect* faf = target->GetAuraEffect(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, SPELLFAMILY_DRUID, 0x400, 0x0, 0x0, me->GetGUID()))
+                    faf->ChangeAmount(faf->GetAmount() + 3);
+            }
 
             OnSpellHitTarget(target, spell);
         }
@@ -2594,11 +2603,8 @@ public:
             }
         }
 
-        void UnsummonAll() override
+        void UnsummonAll(bool /*savePets*/ = true) override
         {
-            //if (botPet)
-            //    botPet->ToTempSummon()->UnSummon();
-
             for (uint8 i = 0; i != MAX_TREANTS; ++i)
             {
                 if (_treants[i])
@@ -2622,7 +2628,7 @@ public:
 
         void Reset() override
         {
-            UnsummonAll();
+            UnsummonAll(false);
             for (uint8 i = 0; i != MAX_TREANTS; ++i)
                 _treants[i] = ObjectGuid::Empty;
 
@@ -2721,6 +2727,7 @@ public:
             InitSpellMap(AQUATIC_FORM_1);
             InitSpellMap(CURE_POISON_1);
             InitSpellMap(ABOLISH_POISON_1);
+            InitSpellMap(REMOVE_CURSE_1);
             InitSpellMap(ENTANGLING_ROOTS_1);
             InitSpellMap(CYCLONE_1);
             InitSpellMap(HIBERNATE_1);

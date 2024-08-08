@@ -70,7 +70,27 @@ class bot_ai : public CreatureAI
 
         virtual void OnBotSummon(Creature* /*summon*/) {}
         virtual void OnBotDespawn(Creature* /*summon*/) {}
-        virtual void UnsummonAll() {}
+
+        virtual void UnsummonAll(bool /*savePets*/ = true) {}
+        void UnsummonCreature(Creature* creature, bool save);
+        void UnsummonPet(bool save);
+        template<typename C>
+        void UnsummonCreatures(C const& container, bool save)
+        {
+            C c2 = container; // copy; original container might get modified from within the loop
+            for (auto c : c2)
+                UnsummonCreature(c, save);
+        }
+
+        virtual void ResummonAll() {}
+        void ResummonCreature(Creature* creature);
+        void ResummonPet();
+        template<typename C>
+        void ResummonCreatures(C const& container)
+        {
+            for (auto c : container)
+                ResummonCreature(c);
+        }
 
         virtual void OnBotDamageTaken(Unit* /*attacker*/, uint32 /*damage*/, CleanDamage const* /*cleanDamage*/, DamageEffectType /*damagetype*/, SpellInfo const* /*spellInfo*/) {}
         virtual void OnBotDamageDealt(Unit* /*victim*/, uint32 /*damage*/, CleanDamage const* /*cleanDamage*/, DamageEffectType /*damagetype*/, SpellInfo const* /*spellInfo*/) {}
@@ -519,7 +539,8 @@ class bot_ai : public CreatureAI
 
         void ReportSpellCast(uint32 spellId, const std::string& followedByString, Player const* target) const;
 
-        void ApplyItemBonuses(uint8 slot);
+        void ApplyItemEnchantment(Item* item, EnchantmentSlot eslot, uint8 slot);
+        void RemoveItemClassEnchantment(uint8 slot);
 
         bool HasAuraTypeWithValueAtLeast(AuraType auratype, int32 minvalue, Unit const* unit = nullptr) const;
 
@@ -579,9 +600,9 @@ class bot_ai : public CreatureAI
         void RemoveItemBonuses(uint8 slot);
         void RemoveItemEnchantments(Item const* item);
         void RemoveItemEnchantment(Item const* item, EnchantmentSlot eslot);
-        void RemoveItemClassEnchants();
+        void RemoveItemClassEnchantments();
+        void ApplyItemBonuses(uint8 slot);
         void ApplyItemEnchantments(Item* item, uint8 slot);
-        void ApplyItemEnchantment(Item* item, EnchantmentSlot eslot, uint8 slot);
         void ApplyItemEquipSpells(Item* item, bool apply);
         void ApplyItemEquipEnchantmentSpells(Item* item);
         void ApplyItemSetBonuses(Item* item, bool apply);

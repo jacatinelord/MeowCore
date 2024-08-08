@@ -19,6 +19,10 @@
 #include "ScriptedCreature.h"
 #include "ScriptedEscortAI.h"
 #include "black_temple.h"
+#include "Player.h"
+#include "ScriptedGossip.h"
+#include "SpellAuraEffects.h"
+#include "SpellScript.h"
 
 enum Says
 {

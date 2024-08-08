@@ -36,7 +36,6 @@
 #include "LFGMgr.h"
 #include "Log.h"
 #include "MapMgr.h"
-#include <numeric>
 #include "Pet.h"
 #include "PoolMgr.h"
 #include "ReputationMgr.h"
@@ -53,6 +52,7 @@
 #include "Vehicle.h"
 #include "World.h"
 #include <boost/algorithm/string.hpp>
+#include <numeric>
 
 //npcbot
 #include "botdatamgr.h"
@@ -205,62 +205,6 @@ std::string ScriptInfo::GetDebugInfo() const
     char sz[256];
     snprintf(sz, sizeof(sz), "%s ('%s' script id: %u)", GetScriptCommandName(command).c_str(), GetScriptsTableNameByType(type).c_str(), id);
     return std::string(sz);
-}
-
-/**
- * @name ReservedNames
- * @brief Checks NamesReserved.dbc for reserved names
- *
- * @param name Name to check for match in NamesReserved.dbc
- * @return true/false
- */
-bool ReservedNames(std::wstring& name)
-{
-    for (NamesReservedEntry const* reservedStore : sNamesReservedStore)
-    {
-        std::wstring PatternString;
-
-        Utf8toWStr(reservedStore->Pattern, PatternString);
-
-        boost::algorithm::replace_all(PatternString, "\\<", "");
-        boost::algorithm::replace_all(PatternString, "\\>", "");
-
-        int stringCompare = name.compare(PatternString);
-        if (stringCompare == 0)
-        {
-            return true;
-        }
-    }
-
-    return false;
-};
-
-/**
- * @name ProfanityNames
- * @brief Checks NamesProfanity.dbc for reserved names
- *
- * @param name Name to check for match in NamesProfanity.dbc
- * @return true/false
- */
-bool ProfanityNames(std::wstring& name)
-{
-    for (NamesProfanityEntry const* profanityStore : sNamesProfanityStore)
-    {
-        std::wstring PatternString;
-
-        Utf8toWStr(profanityStore->Pattern, PatternString);
-
-        boost::algorithm::replace_all(PatternString, "\\<", "");
-        boost::algorithm::replace_all(PatternString, "\\>", "");
-
-        int stringCompare = name.compare(PatternString);
-        if (stringCompare == 0)
-        {
-            return true;
-        }
-    }
-
-    return false;
 }
 
 bool normalizePlayerName(std::string& name)
@@ -441,7 +385,7 @@ void ObjectMgr::AddLocaleString(std::string&& s, LocaleConstant locale, std::vec
 {
     if (!s.empty())
     {
-        if (data.size() <= size_t(locale))
+        if (data.size() <= std::size_t(locale))
             data.resize(locale + 1);
 
         data[locale] = std::move(s);
@@ -5579,9 +5523,9 @@ void ObjectMgr::LoadEventScripts()
                     if (spell->Effects[j].MiscValue)
                         evt_scripts.insert(spell->Effects[j].MiscValue);
 
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
+    for (std::size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
     {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
+        for (std::size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
         {
             TaxiPathNodeEntry const* node = sTaxiPathNodesByPath[path_idx][node_idx];
 
@@ -8150,7 +8094,7 @@ void ObjectMgr::LoadCreatureQuestEnders()
     }
 }
 
-void ObjectMgr::LoadReservedPlayersNames()
+void ObjectMgr::LoadReservedPlayerNamesDB()
 {
     uint32 oldMSTime = getMSTime();
 
@@ -8160,8 +8104,7 @@ void ObjectMgr::LoadReservedPlayersNames()
 
     if (!result)
     {
-        LOG_WARN("server.loading", ">> Loaded 0 reserved player names. DB table `reserved_name` is empty!");
-        LOG_INFO("server.loading", " ");
+        LOG_WARN("server.loading", ">> Loaded 0 reserved names. DB table `reserved_name` is empty!");
         return;
     }
 
@@ -8186,7 +8129,36 @@ void ObjectMgr::LoadReservedPlayersNames()
         ++count;
     } while (result->NextRow());
 
-    LOG_INFO("server.loading", ">> Loaded {} reserved player names in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded {} reserved names from DB in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadReservedPlayerNamesDBC()
+{
+    if (!sWorld->getBoolConfig(CONFIG_STRICT_NAMES_RESERVED))
+    {
+        LOG_WARN("server.loading", ">> Loaded 0 reserved names from DBC. Config option disabled.");
+        return;
+    }
+
+    uint32 oldMSTime = getMSTime();
+
+    uint32 count = 0;
+
+    for (NamesReservedEntry const* reservedStore : sNamesReservedStore)
+    {
+        std::wstring wstr;
+
+        Utf8toWStr(reservedStore->Pattern, wstr);
+
+        // DBC does not have clean entries, remove the junk.
+        boost::algorithm::replace_all(wstr, "\\<", "");
+        boost::algorithm::replace_all(wstr, "\\>", "");
+
+        _reservedNamesStore.insert(wstr);
+        count++;
+    }
+
+    LOG_INFO("server.loading", ">> Loaded {} reserved names from DBC in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
 }
 
@@ -8225,7 +8197,7 @@ void ObjectMgr::AddReservedPlayerName(std::string const& name)
     }
 }
 
-void ObjectMgr::LoadProfanityPlayersNames()
+void ObjectMgr::LoadProfanityNamesFromDB()
 {
     uint32 oldMSTime = getMSTime();
 
@@ -8235,8 +8207,7 @@ void ObjectMgr::LoadProfanityPlayersNames()
 
     if (!result)
     {
-        LOG_WARN("server.loading", ">> Loaded 0 profanity player names. DB table `profanity_name` is empty!");
-        LOG_INFO("server.loading", " ");
+        LOG_WARN("server.loading", ">> Loaded 0 profanity names. DB table `profanity_name` is empty!");
         return;
     }
 
@@ -8261,7 +8232,36 @@ void ObjectMgr::LoadProfanityPlayersNames()
         ++count;
     } while (result->NextRow());
 
-    LOG_INFO("server.loading", ">> Loaded {} profanity player names in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+    LOG_INFO("server.loading", ">> Loaded {} profanity names from DB in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
+}
+
+void ObjectMgr::LoadProfanityNamesFromDBC()
+{
+    if (!sWorld->getBoolConfig(CONFIG_STRICT_NAMES_PROFANITY))
+    {
+        LOG_WARN("server.loading", ">> Loaded 0 profanity names from DBC. Config option disabled.");
+        return;
+    }
+
+    uint32 oldMSTime = getMSTime();
+
+    uint32 count = 0;
+
+    for (NamesProfanityEntry const* profanityStore : sNamesProfanityStore)
+    {
+        std::wstring wstr;
+
+        Utf8toWStr(profanityStore->Pattern, wstr);
+
+        // DBC does not have clean entries, remove the junk.
+        boost::algorithm::replace_all(wstr, "\\<", "");
+        boost::algorithm::replace_all(wstr, "\\>", "");
+
+        _profanityNamesStore.insert(wstr);
+        count++;
+    }
+
+    LOG_INFO("server.loading", ">> Loaded {} profanity names from DBC in {} ms", count, GetMSTimeDiffToNow(oldMSTime));
     LOG_INFO("server.loading", " ");
 }
 
@@ -8397,38 +8397,17 @@ uint8 ObjectMgr::CheckPlayerName(std::string_view name, bool create)
 
     // Check for three consecutive letters
     wstrToLower(wname);
-    for (size_t i = 2; i < wname.size(); ++i)
+    for (std::size_t i = 2; i < wname.size(); ++i)
         if (wname[i] == wname[i - 1] && wname[i] == wname[i - 2])
             return CHAR_NAME_THREE_CONSECUTIVE;
 
-    // Check Reserved Name from Database
+    // Check Reserved Name
     if (sObjectMgr->IsReservedName(name))
-    {
         return CHAR_NAME_RESERVED;
-    }
 
+    // Check Profanity Name
     if (sObjectMgr->IsProfanityName(name))
-    {
         return CHAR_NAME_PROFANE;
-    }
-
-    // Check for Reserved Name from DBC
-    if (sWorld->getBoolConfig(CONFIG_STRICT_NAMES_RESERVED))
-    {
-        if (ReservedNames(wname))
-        {
-            return CHAR_NAME_RESERVED;
-        }
-    }
-
-    // Check for Profanity
-    if (sWorld->getBoolConfig(CONFIG_STRICT_NAMES_PROFANITY))
-    {
-        if (ProfanityNames(wname))
-        {
-            return CHAR_NAME_PROFANE;
-        }
-    }
 
     return CHAR_NAME_SUCCESS;
 }
@@ -8446,23 +8425,13 @@ bool ObjectMgr::IsValidCharterName(std::string_view name)
     if (wname.size() < minName)
         return false;
 
-    // Check for Reserved Name from DBC
-    if (sWorld->getBoolConfig(CONFIG_STRICT_NAMES_RESERVED))
-    {
-        if (ReservedNames(wname))
-        {
-            return false;
-        }
-    }
+    // Check Reserved Name
+    if (sObjectMgr->IsReservedName(name))
+        return false;
 
-    // Check for Profanity
-    if (sWorld->getBoolConfig(CONFIG_STRICT_NAMES_PROFANITY))
-    {
-        if (ProfanityNames(wname))
-        {
-            return false;
-        }
-    }
+    // Check Profanity Name
+    if (sObjectMgr->IsProfanityName(name))
+        return false;
 
     uint32 strictMask = sWorld->getIntConfig(CONFIG_STRICT_CHARTER_NAMES);
 
@@ -8500,23 +8469,13 @@ PetNameInvalidReason ObjectMgr::CheckPetName(std::string_view name)
     if (!isValidString(wname, strictMask, false))
         return PET_NAME_MIXED_LANGUAGES;
 
-    // Check for Reserved Name from DBC
-    if (sWorld->getBoolConfig(CONFIG_STRICT_NAMES_RESERVED))
-    {
-        if (ReservedNames(wname))
-        {
-            return PET_NAME_RESERVED;
-        }
-    }
+    // Check Reserved Name
+    if (sObjectMgr->IsReservedName(name))
+        return PET_NAME_RESERVED;
 
-    // Check for Profanity
-    if (sWorld->getBoolConfig(CONFIG_STRICT_NAMES_PROFANITY))
-    {
-        if (ProfanityNames(wname))
-        {
-            return PET_NAME_PROFANE;
-        }
-    }
+    // Check Profanity Name
+    if (sObjectMgr->IsProfanityName(name))
+        return PET_NAME_PROFANE;
 
     return PET_NAME_SUCCESS;
 }
@@ -8631,7 +8590,7 @@ char const* ObjectMgr::GetAcoreString(uint32 entry, LocaleConstant locale) const
 {
     if (AcoreString const* ts = GetAcoreString(entry))
     {
-        if (ts->Content.size() > size_t(locale) && !ts->Content[locale].empty())
+        if (ts->Content.size() > std::size_t(locale) && !ts->Content[locale].empty())
             return ts->Content[locale].c_str();
 
         return ts->Content[DEFAULT_LOCALE].c_str();
@@ -9473,7 +9432,7 @@ bool ObjectMgr::IsVendorItemValid(uint32 vendor_entry, uint32 item_id, int32 max
     if (maxcount > 0 && incrtime == 0)
     {
         if (player)
-            ChatHandler(player->GetSession()).PSendSysMessage("MaxCount != 0 (%u) but IncrTime == 0", maxcount);
+            ChatHandler(player->GetSession()).PSendSysMessage("MaxCount != 0 ({}) but IncrTime == 0", maxcount);
         else
             LOG_ERROR("sql.sql", "Table `(game_event_)npc_vendor` has `maxcount` ({}) for item {} of vendor (Entry: {}) but `incrtime`=0, ignore", maxcount, item_id, vendor_entry);
         return false;

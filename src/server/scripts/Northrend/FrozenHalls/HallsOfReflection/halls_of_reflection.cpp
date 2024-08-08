@@ -15,11 +15,16 @@
  * with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "halls_of_reflection.h"
 #include "AreaTriggerScript.h"
 #include "CreatureScript.h"
+#include "InstanceScript.h"
 #include "MotionMaster.h"
+#include "PassiveAI.h"
+#include "ScriptedCreature.h"
+#include "ScriptedGossip.h"
+#include "SpellScript.h"
 #include "SpellScriptLoader.h"
-#include "halls_of_reflection.h"
 
 enum Events
 {

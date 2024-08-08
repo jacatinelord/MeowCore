@@ -16,6 +16,11 @@ inputs:
     description: Flag to install modules or not
     required: true
     type: boolean
+  tools:
+    default: none
+    description: Flag to enable tools build
+    required: false
+    type: string
   pch:
     default: false
     description: Flag to enable or disable PCH
@@ -94,13 +99,15 @@ runs:
         cmake "$GITHUB_WORKSPACE" \
           -DCMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/env/dist" \
           -DAPPS_BUILD="all" \
-          -DTOOLS_BUILD="all" \
+          -DTOOLS_BUILD=${{ inputs.tools }} \
           -DSCRIPTS="static" \
           -DMODULES="static" \
           -DWITH_WARNINGS="ON" \
           -DCMAKE_BUILD_TYPE="Release" \
           -DCMAKE_CXX_COMPILER_LAUNCHER="ccache" \
           -DCMAKE_C_COMPILER_LAUNCHER="ccache" \
+          -DCMAKE_C_FLAGS="-Werror" \
+          -DCMAKE_CXX_FLAGS="-Werror" \
           -DBUILD_TESTING="ON" \
           -DUSE_SCRIPTPCH=${{ inputs.pch == 'true' && 'ON' || '' }} \
           -DUSE_COREPCH=${{ inputs.pch == 'true' && 'ON' || '' }} \
@@ -141,10 +148,6 @@ runs:
     - name: Start MySQL container
       shell: bash
       run: sudo systemctl start mysql.service
-
-    - name: run dbimport
-      shell: bash
-      run: env/dist/bin/dbimport
 
     - name: Dry run authserver
       shell: bash

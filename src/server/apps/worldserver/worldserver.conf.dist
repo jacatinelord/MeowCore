@@ -698,6 +698,26 @@ Logger.spells.scripts=2,Console Errors
 #Logger.bg.battleground=4,Console Server
 #Logger.bg.reportpvpafk=4,Console Server
 #Logger.calendar=4,Console Server
+#Logger.chat.say=4,Console Chat
+#Logger.chat.emote=4,Console Chat
+#Logger.chat.yell=4,Console Chat
+#Logger.chat.whisper=4,Console Chat
+#Logger.chat.party=4,Console Chat
+#Logger.chat.raid=4,Console Chat
+#Logger.chat.bg=4,Console Chat
+#Logger.chat.guild=4,Console Chat
+#Logger.chat.guild.officer=4,Console Chat
+#Logger.chat.channel=4,Console Chat
+#Logger.chat.addon.msg=4,Console Chat
+#Logger.chat.addon.emote=4,Console Chat
+#Logger.chat.addon.yell=4,Console Chat
+#Logger.chat.addon.whisper=4,Console Chat
+#Logger.chat.addon.party=4,Console Chat
+#Logger.chat.addon.raid=4,Console Chat
+#Logger.chat.addon.bg=4,Console Chat
+#Logger.chat.addon.guild=4,Console Chat
+#Logger.chat.addon.guild.officer=4,Console Chat
+#Logger.chat.addon.channel=4,Console Chat
 #Logger.chat.log=4,Console Server
 #Logger.chat.log.addon=4,Console Server
 #Logger.chat.system=4,Console Server
@@ -4338,6 +4358,13 @@ ICC.Buff.Horde    = 73822
 ICC.Buff.Alliance = 73828
 
 #
+#    WipeGunshipBlizzlike.Enable
+#       Description: Wipe the gunship fight if no player is on the deck.
+#       Default:     1 - (Blizzlike)
+
+WipeGunshipBlizzlike.Enable = 1
+
+#
 #     Minigob.Manabonk.Enable
 #        Description: Enable/ Disable Minigob Manabonk
 #        Default:     1
@@ -4380,6 +4407,20 @@ TeleportTimeoutFar = 45
 #        Default: 71 - (Blizzlike)
 
 DailyRBGArenaPoints.MinLevel = 71
+
+#
+#    MunchingBlizzlike.Enabled
+#        Description: Enable the Blizzlike implementation of munching with e.g. Warrior's Rend or Mage's Ignite
+#        Default: 1 - (Blizzlike)
+
+MunchingBlizzlike.Enabled = 1
+
+#
+#    Daze.Enabled
+#        Description: Enable or disable the chance for mob melee attacks to daze the victim.
+#        Default: 1 - (Blizzlike)
+
+Daze.Enabled = 1
 
 #
 ###################################################################################################
@@ -4623,10 +4664,10 @@ NpcBot.Limit.Raid    = 1
 #        Description: Prevent inactive bots from entering world
 #        Note:        Botgiver npc will become the only way to hire bots
 #        Note2:       Only GM's presense will reveal bot's spawn location (temporarily)
-#        Default:     0 - (Disabled, keep all spawned bots in world)
-#                     1 - (Enabled)
+#        Default:     1 - (Enabled)
+#                     0 - (Disabled, keep all spawned bots in world)
 
-NpcBot.HideSpawns = 0
+NpcBot.HideSpawns = 1
 
 #
 #    NpcBot.Cost
@@ -4933,6 +4974,50 @@ NpcBot.WanderingBots.BG.TargetTeamPlayersCount.AB = 12
 NpcBot.WanderingBots.BG.TargetTeamPlayersCount.EY = 0
 NpcBot.WanderingBots.BG.TargetTeamPlayersCount.SA = 0
 NpcBot.WanderingBots.BG.TargetTeamPlayersCount.IC = 0
+
+#
+#    NpcBot.WanderingBots.Classes.<Class>.Enable
+#        Description: Allow players to hire bots of certain classes.
+#        Note:        Some non-standard class abilities may be unbalanced or game breaking.
+#        Default:     1 - (NpcBot.Classes.Warrior.Enable)
+#                     1 - (NpcBot.Classes.Paladin.Enable)
+#                     1 - (NpcBot.Classes.Hunter.Enable)
+#                     1 - (NpcBot.Classes.Rogue.Enable)
+#                     1 - (NpcBot.Classes.Priest.Enable)
+#                     1 - (NpcBot.Classes.DeathKnight.Enable)
+#                     1 - (NpcBot.Classes.Shaman.Enable)
+#                     1 - (NpcBot.Classes.Mage.Enable)
+#                     1 - (NpcBot.Classes.Warlock.Enable)
+#                     1 - (NpcBot.Classes.Druid.Enable)
+#                     0 - (NpcBot.Classes.Blademaster.Enable)
+#                     1 - (NpcBot.Classes.ObsidianDestroyer.Enable)
+#                     1 - (NpcBot.Classes.Archmage.Enable)
+#                     1 - (NpcBot.Classes.Dreadlord.Enable)
+#                     1 - (NpcBot.Classes.SpellBreaker.Enable)
+#                     1 - (NpcBot.Classes.DarkRanger.Enable)
+#                     1 - (NpcBot.Classes.Necromancer.Enable)
+#                     1 - (NpcBot.Classes.SeaWitch.Enable)
+#                     1 - (NpcBot.Classes.CryptLord.Enable)
+
+NpcBot.WanderingBots.Classes.Warrior.Enable           = 1
+NpcBot.WanderingBots.Classes.Paladin.Enable           = 1
+NpcBot.WanderingBots.Classes.Hunter.Enable            = 1
+NpcBot.WanderingBots.Classes.Rogue.Enable             = 1
+NpcBot.WanderingBots.Classes.Priest.Enable            = 1
+NpcBot.WanderingBots.Classes.DeathKnight.Enable       = 1
+NpcBot.WanderingBots.Classes.Shaman.Enable            = 1
+NpcBot.WanderingBots.Classes.Mage.Enable              = 1
+NpcBot.WanderingBots.Classes.Warlock.Enable           = 1
+NpcBot.WanderingBots.Classes.Druid.Enable             = 1
+NpcBot.WanderingBots.Classes.Blademaster.Enable       = 0
+NpcBot.WanderingBots.Classes.ObsidianDestroyer.Enable = 1
+NpcBot.WanderingBots.Classes.Archmage.Enable          = 1
+NpcBot.WanderingBots.Classes.Dreadlord.Enable         = 1
+NpcBot.WanderingBots.Classes.SpellBreaker.Enable      = 1
+NpcBot.WanderingBots.Classes.DarkRanger.Enable        = 1
+NpcBot.WanderingBots.Classes.Necromancer.Enable       = 1
+NpcBot.WanderingBots.Classes.SeaWitch.Enable          = 1
+NpcBot.WanderingBots.Classes.CryptLord.Enable         = 1
 
 #
 #    NpcBot.HK.Enable

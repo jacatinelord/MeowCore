@@ -1372,7 +1372,7 @@ void Spell::SelectImplicitCasterDestTargets(SpellEffIndex effIndex, SpellImplici
             break;
         case TARGET_DEST_HOME:
             if (Player* playerCaster = m_caster->ToPlayer())
-                dest = SpellDestination(playerCaster->m_homebindX, playerCaster->m_homebindY, playerCaster->m_homebindZ, playerCaster->m_homebindO, playerCaster->m_homebindMapId);
+                dest = SpellDestination(playerCaster->m_homebindX, playerCaster->m_homebindY, playerCaster->m_homebindZ, playerCaster->GetOrientation(), playerCaster->m_homebindMapId);
             break;
         case TARGET_DEST_DB:
             if (SpellTargetPosition const* st = sSpellMgr->GetSpellTargetPosition(m_spellInfo->Id, effIndex))
@@ -3247,6 +3247,8 @@ SpellMissInfo Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, bool scaleA
                 if (diminishMod == 0.0f)
                 {
                     m_spellAura->Remove();
+                    if (m_diminishGroup == DIMINISHING_TAUNT)
+                        return SPELL_MISS_IMMUNE;
                     bool found = false;
                     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
                         if (effectMask & (1 << i) && m_spellInfo->Effects[i].Effect != SPELL_EFFECT_APPLY_AURA)
@@ -3791,7 +3793,6 @@ void Spell::cancel(bool bySelf)
         return;
 
     uint32 oldState = m_spellState;
-    bool autoRepeat = m_autoRepeat;
     m_spellState = SPELL_STATE_FINISHED;
 
     m_autoRepeat = false;
@@ -3799,6 +3800,8 @@ void Spell::cancel(bool bySelf)
     {
         case SPELL_STATE_PREPARING:
             CancelGlobalCooldown();
+            SendCastResult(SPELL_FAILED_INTERRUPTED);
+
             if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
                 if (m_caster->ToPlayer()->NeedSendSpectatorData())
@@ -3806,10 +3809,7 @@ void Spell::cancel(bool bySelf)
             }
             [[fallthrough]];
         case SPELL_STATE_DELAYED:
-            SendInterrupted(0);
-            // xinef: fixes bugged gcd reset in some cases
-            if (!autoRepeat)
-                SendCastResult(SPELL_FAILED_INTERRUPTED);
+            SendInterrupted(SPELL_FAILED_INTERRUPTED);
             break;
         case SPELL_STATE_CASTING:
             if (!bySelf)
@@ -5123,7 +5123,7 @@ void Spell::WriteSpellGoTargets(WorldPacket* data)
     // correct count for both hit and miss).
 
     uint32 hit = 0;
-    size_t hitPos = data->wpos();
+    std::size_t hitPos = data->wpos();
     *data << (uint8)0; // placeholder
     for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end() && hit < 255; ++ihit)
     {
@@ -5143,7 +5143,7 @@ void Spell::WriteSpellGoTargets(WorldPacket* data)
     }
 
     uint32 miss = 0;
-    size_t missPos = data->wpos();
+    std::size_t missPos = data->wpos();
     *data << (uint8)0; // placeholder
     for (std::list<TargetInfo>::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end() && miss < 255; ++ihit)
     {
@@ -5959,7 +5959,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             SpellEffectInfo const* effInfo = &m_spellInfo->Effects[effIndex];
             if (effInfo->ApplyAuraName == SPELL_AURA_MOD_SHAPESHIFT)
             {
-                SpellShapeshiftEntry const* shapeShiftEntry = sSpellShapeshiftStore.LookupEntry(effInfo->MiscValue);
+                SpellShapeshiftFormEntry const* shapeShiftEntry = sSpellShapeshiftFormStore.LookupEntry(effInfo->MiscValue);
                 if (shapeShiftEntry && (shapeShiftEntry->flags1 & 1) == 0)  // unk flag
                     checkMask |= VEHICLE_SEAT_FLAG_UNCONTROLLED;
                 break;
@@ -7953,6 +7953,9 @@ void Spell::Delayed() // only called in DealDamage()
     if (isDelayableNoMore())                                 // Spells may only be delayed twice
         return;
 
+    if (m_spellInfo->HasAttribute(SPELL_ATTR6_NO_PUSHBACK))
+        return;
+
     // spells not loosing casting time (slam, dynamites, bombs..)
     //if (!(m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_DAMAGE))
     //    return;
@@ -7990,6 +7993,9 @@ void Spell::DelayedChannel()
         return;
 
     if (isDelayableNoMore())                                    // Spells may only be delayed twice
+        return;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR6_NO_PUSHBACK))
         return;
 
     //check pushback reduce
