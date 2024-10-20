@@ -11,6 +11,7 @@
 ## IMPORTANT
 
 This Version of MeowCore Mix (AzerothCore & Trickerer's NPC Bot) may be broken and will not work / returning error while compiling. Proceed with awareness & caution.
+
 You may find personal past fixes within commits.
 
 ## Introduction
